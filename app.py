@@ -2274,11 +2274,13 @@ def server_error(e):
 # ----------------------------------------------------------------------------
 if __name__ == "__main__":
     init_db()
-    print("=" * 60)
     print("StudyGenie AI is starting...")
-    print(f"Gemini AI Integration: {'ENABLED (model: ' + GEMINI_MODEL_NAME + ')' if GEMINI_ENABLED else 'DISABLED - set GEMINI_API_KEY in .env (AI Quiz will show an error until then)'}")
-    print("Visit: http://127.0.0.1:5000")
-    print("=" * 60)
-    app.run(debug=True, host="0.0.0.0", port=5000)
+
+    app.run(
+        debug=False,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        use_reloader=False
+    )
 else:
     init_db()
