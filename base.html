@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}StudyGenie AI{% endblock %} | StudyGenie AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% block extra_css %}{% endblock %}
+</head>
+<body class="app-body">
+
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="fa-solid fa-brain"></i>
+      <span>StudyGenie <b>AI</b></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('dashboard') }}" class="nav-link {{ 'active' if request.endpoint=='dashboard' }}">
+        <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('upload') }}" class="nav-link {{ 'active' if request.endpoint=='upload' }}">
+        <i class="fa-solid fa-file-arrow-up"></i><span>Upload Syllabus</span>
+      </a>
+      <a href="{{ url_for('planner') }}" class="nav-link {{ 'active' if request.endpoint=='planner' }}">
+        <i class="fa-solid fa-wand-magic-sparkles"></i><span>AI Planner</span>
+      </a>
+      <a href="{{ url_for('timetable') }}" class="nav-link {{ 'active' if request.endpoint=='timetable' }}">
+        <i class="fa-solid fa-table-list"></i><span>Timetable</span>
+      </a>
+      <a href="{{ url_for('revision') }}" class="nav-link {{ 'active' if request.endpoint=='revision' }}">
+        <i class="fa-solid fa-rotate"></i><span>Revision Planner</span>
+      </a>
+      <a href="{{ url_for('notes') }}" class="nav-link {{ 'active' if request.endpoint=='notes' }}">
+        <i class="fa-solid fa-note-sticky"></i><span>AI Notes</span>
+      </a>
+      <a href="{{ url_for('quiz') }}" class="nav-link {{ 'active' if request.endpoint=='quiz' }}">
+        <i class="fa-solid fa-circle-question"></i><span>AI Quiz</span>
+      </a>
+      <a href="{{ url_for('progress') }}" class="nav-link {{ 'active' if request.endpoint=='progress' }}">
+        <i class="fa-solid fa-chart-line"></i><span>Progress</span>
+      </a>
+      <a href="{{ url_for('performance') }}" class="nav-link {{ 'active' if request.endpoint=='performance' }}">
+        <i class="fa-solid fa-bullseye"></i><span>Performance</span>
+      </a>
+
+      <div class="nav-section-label">AI Insights</div>
+      <a href="{{ url_for('weak_topics') }}" class="nav-link {{ 'active' if request.endpoint=='weak_topics' }}">
+        <i class="fa-solid fa-magnifying-glass-chart"></i><span>Weak Topics</span>
+      </a>
+      <a href="{{ url_for('smart_revision') }}" class="nav-link {{ 'active' if request.endpoint=='smart_revision' }}">
+        <i class="fa-solid fa-calendar-week"></i><span>Smart Revision</span>
+      </a>
+      <a href="{{ url_for('analytics') }}" class="nav-link {{ 'active' if request.endpoint=='analytics' }}">
+        <i class="fa-solid fa-chart-simple"></i><span>Analytics</span>
+      </a>
+      <a href="{{ url_for('achievements') }}" class="nav-link {{ 'active' if request.endpoint=='achievements' }}">
+        <i class="fa-solid fa-medal"></i><span>Achievements</span>
+      </a>
+
+      <div class="nav-section-label">Organize</div>
+      <a href="{{ url_for('todo') }}" class="nav-link {{ 'active' if request.endpoint=='todo' }}">
+        <i class="fa-solid fa-list-check"></i><span>To-Do List</span>
+      </a>
+      <a href="{{ url_for('reminders_page') }}" class="nav-link {{ 'active' if request.endpoint=='reminders_page' }}">
+        <i class="fa-solid fa-bell"></i><span>Reminders</span>
+      </a>
+      <a href="{{ url_for('settings') }}" class="nav-link {{ 'active' if request.endpoint=='settings' }}">
+        <i class="fa-solid fa-gear"></i><span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('logout') }}" class="nav-link logout-link">
+        <i class="fa-solid fa-right-from-bracket"></i><span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="main-wrap">
+    <header class="topbar">
+      <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+      <div class="topbar-actions">
+        <a href="{{ url_for('achievements') }}" class="xp-pill" title="View Achievements">
+          <i class="fa-solid fa-bolt"></i> Lv {{ nav_level }} <span>{{ nav_xp }} XP</span>
+        </a>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <div class="user-chip">
+          <div class="avatar">{{ (session.get('user_name') or 'U')[0]|upper }}</div>
+          <span>{{ session.get('user_name', 'User') }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-area">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">
+              <i class="fa-solid fa-circle-info"></i> {{ message }}
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

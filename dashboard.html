@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="welcome-banner glass-card">
+  <div>
+    <h2>Welcome back, {{ user['name'] }} 👋</h2>
+    <p><i class="fa-solid fa-quote-left"></i> {{ quote }}</p>
+  </div>
+  <a href="{{ url_for('planner') }}" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate New Plan</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-blue"><i class="fa-solid fa-chart-pie"></i></div>
+    <div><span class="stat-value">{{ progress_pct }}%</span><span class="stat-label">Overall Progress</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-orange"><i class="fa-solid fa-fire"></i></div>
+    <div><span class="stat-value">{{ streak }}</span><span class="stat-label">Day Study Streak</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-green"><i class="fa-solid fa-clock"></i></div>
+    <div><span class="stat-value">{{ total_hours }}h</span><span class="stat-label">Hours Studied</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-purple"><i class="fa-solid fa-book"></i></div>
+    <div><span class="stat-value">{{ completed_topics }}/{{ total_topics }}</span><span class="stat-label">Topics Completed</span></div>
+  </div>
+</div>
+
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-calendar-day"></i> Today's Study Plan</h3></div>
+    {% if todays_plan %}
+      <ul class="plan-list">
+      {% for item in todays_plan %}
+        <li class="{{ 'done' if item['completed'] }}">
+          <i class="fa-solid {{ 'fa-circle-check' if item['completed'] else 'fa-circle' }}"></i>
+          <span class="plan-subject">{{ item['subject'] }}</span>
+          <span class="plan-topic">{{ item['topic'] }}</span>
+          <span class="plan-hours">{{ item['hours'] }}h</span>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-mug-hot"></i>
+        <p>No study plan for today. Generate one with the AI Planner!</p>
+        <a href="{{ url_for('planner') }}" class="btn btn-primary btn-sm">Create Plan</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-calendar-check"></i> Upcoming Exams</h3></div>
+    {% if upcoming_exams %}
+      <ul class="exam-list">
+      {% for exam in upcoming_exams %}
+        <li>
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>{{ exam['priority_subjects'] or 'Upcoming Exam' }}</span>
+          <span class="exam-date">{{ exam['exam_date'] }}</span>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-calendar-xmark"></i>
+        <p>No upcoming exams scheduled yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-chart-line"></i> Weekly Progress</h3></div>
+  <canvas id="weeklyChart" height="90"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('weeklyChart');
+  const labels = {{ week_labels|safe }};
+  const data = {{ week_hours|safe }};
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Hours Studied',
+        data: data,
+        borderColor: '#7C3AED',
+        backgroundColor: 'rgba(124,58,237,0.15)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#7C3AED',
+        pointRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, grid: { color: 'rgba(128,128,128,0.15)' } }, x: { grid: { display: false } } }
+    }
+  });
+});
+</script>
+{% endblock %}

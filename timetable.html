@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Smart Timetable{% endblock %}
+{% block page_title %}{{ 'Revision Planner' if is_revision_view else 'Smart Timetable' }}{% endblock %}
+
+{% block content %}
+{% if is_revision_view %}
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-rotate"></i> AI Revision Plan</h3></div>
+    {% if revision_plan %}
+      {% for day in revision_plan %}
+        <div class="day-block">
+          <div class="day-block-header"><i class="fa-solid fa-calendar-day"></i> {{ day.date }}</div>
+          <ul class="plan-list">
+          {% for t in day.topics %}
+            <li><i class="fa-solid fa-circle-dot"></i><span class="plan-subject">{{ t.subject }}</span><span class="plan-topic">{{ t.topic }}</span></li>
+          {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-check-double"></i>
+        <p>No remaining topics or active study plan found. Generate a plan first, or you're all caught up!</p>
+        <a href="{{ url_for('planner') }}" class="btn btn-primary btn-sm">Create Study Plan</a>
+      </div>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="daily">Daily Plan</button>
+    <button class="tab-btn" data-tab="weekly">Weekly Plan</button>
+  </div>
+
+  {% if plan %}
+  <div class="panel-card">
+    <div class="panel-header">
+      <h3><i class="fa-solid fa-table-list"></i> Study Plan — Exam on {{ plan['exam_date'] }}</h3>
+    </div>
+
+    <div id="dailyView" class="tab-panel">
+      {% set current_date = namespace(val=None) %}
+      {% for day in plan_days %}
+        {% if day['day_date'] != current_date.val %}
+          {% set current_date.val = day['day_date'] %}
+          {% if not loop.first %}</div>{% endif %}
+          <div class="day-block">
+            <div class="day-block-header"><i class="fa-solid fa-calendar-day"></i> {{ day['day_date'] }}</div>
+        {% endif %}
+        <div class="editable-item {{ 'done' if day['completed'] }}" data-id="{{ day['id'] }}">
+          <input type="checkbox" class="task-check" {{ 'checked' if day['completed'] }}>
+          <input type="text" class="edit-subject" value="{{ day['subject'] }}">
+          <input type="text" class="edit-topic" value="{{ day['topic'] }}">
+          <input type="number" step="0.5" class="edit-hours" value="{{ day['hours'] }}">
+          <span class="badge badge-{{ day['session_type'] }}">{{ day['session_type']|capitalize }}</span>
+          <button class="icon-btn danger delete-day"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+
+    <div id="weeklyView" class="tab-panel hidden">
+      <div class="weekly-grid">
+      {% set seen_dates = [] %}
+      {% for day in plan_days %}
+        {% if day['day_date'] not in seen_dates %}
+          {% set _ = seen_dates.append(day['day_date']) %}
+          <div class="week-card">
+            <h4>{{ day['day_date'] }}</h4>
+            <ul>
+            {% for d2 in plan_days %}
+              {% if d2['day_date'] == day['day_date'] %}
+                <li>{{ d2['subject'] }} — {{ d2['topic'] }} ({{ d2['hours'] }}h)</li>
+              {% endif %}
+            {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+    <div class="empty-state-big">
+      <i class="fa-solid fa-calendar-xmark"></i>
+      <h3>No Study Plan Yet</h3>
+      <p>Generate an AI-powered study plan to see your smart timetable here.</p>
+      <a href="{{ url_for('planner') }}" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Create Study Plan</a>
+    </div>
+  {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('dailyView').classList.toggle('hidden', btn.dataset.tab !== 'daily');
+    document.getElementById('weeklyView').classList.toggle('hidden', btn.dataset.tab !== 'weekly');
+  });
+});
+
+document.querySelectorAll('.editable-item').forEach(item => {
+  const id = item.dataset.id;
+  const checkbox = item.querySelector('.task-check');
+  const subject = item.querySelector('.edit-subject');
+  const topic = item.querySelector('.edit-topic');
+  const hours = item.querySelector('.edit-hours');
+  const del = item.querySelector('.delete-day');
+
+  function save() {
+    fetch(`/api/plan-days/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subject: subject.value, topic: topic.value,
+        hours: parseFloat(hours.value), completed: checkbox.checked
+      })
+    }).then(r => r.json()).then(data => {
+      showToast('Timetable updated', 'success');
+      item.classList.toggle('done', checkbox.checked);
+      showBadgeToasts(data.new_badges);
+    });
+  }
+
+  [checkbox, subject, topic, hours].forEach(el => el.addEventListener('change', save));
+  del.addEventListener('click', () => {
+    if (!confirm('Delete this study session?')) return;
+    fetch(`/api/plan-days/${id}`, { method: 'DELETE' })
+      .then(r => r.json()).then(() => { item.remove(); showToast('Session removed', 'info'); });
+  });
+});
+</script>
+{% endblock %}

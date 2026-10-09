@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}To-Do List{% endblock %}
+{% block page_title %}To-Do List{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-list-check"></i> Manage Your Tasks</h3></div>
+
+  <form id="todoForm" class="form-grid inline-form">
+    <div class="form-field"><input type="text" id="taskInput" placeholder="Add a new task..." required></div>
+    <div class="form-field"><input type="date" id="dueDateInput"></div>
+    <div class="form-field">
+      <select id="priorityInput">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Task</button>
+  </form>
+
+  <ul class="todo-list" id="todoList">
+  {% for t in tasks %}
+    <li class="todo-item {{ 'done' if t['completed'] }}" data-id="{{ t['id'] }}">
+      <input type="checkbox" class="todo-check" {{ 'checked' if t['completed'] }}>
+      <span class="todo-text" contenteditable="true">{{ t['task'] }}</span>
+      <span class="badge badge-{{ t['priority'] }}">{{ t['priority']|capitalize }}</span>
+      <span class="todo-date">{{ t['due_date'] or '' }}</span>
+      <button class="icon-btn danger todo-delete"><i class="fa-solid fa-trash"></i></button>
+    </li>
+  {% else %}
+    <div class="empty-state" id="emptyTodo"><i class="fa-solid fa-clipboard-check"></i><p>No tasks yet. Add one above!</p></div>
+  {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/todo.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Performance Prediction' if performance_view else 'Progress Dashboard' }}{% endblock %}
+{% block page_title %}{{ 'Performance Prediction' if performance_view else 'Progress Dashboard' }}{% endblock %}
+
+{% block content %}
+{% if performance_view %}
+  <div class="panel-card readiness-card">
+    <div class="readiness-ring">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" class="ring-bg"></circle>
+        <circle cx="60" cy="60" r="52" class="ring-fill" style="stroke-dashoffset: {{ 327 - (327 * readiness / 100) }}"></circle>
+      </svg>
+      <div class="ring-label"><span>{{ readiness }}%</span><small>Exam Readiness</small></div>
+    </div>
+    <div class="readiness-info">
+      <h3>{{ estimated_performance }}</h3>
+      <p>Based on {{ topic_completion_pct }}% topic completion and {{ overall_quiz_avg }}% average quiz score.</p>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <div class="panel-card">
+      <div class="panel-header"><h3><i class="fa-solid fa-triangle-exclamation"></i> Weak Subjects</h3></div>
+      {% if weak_subjects %}
+        <ul class="subject-list">
+        {% for s in weak_subjects %}
+          <li><span>{{ s.subject }}</span><span class="badge badge-weak">{{ s.avg }}%</span></li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-face-smile"></i><p>No weak subjects detected yet.</p></div>
+      {% endif %}
+    </div>
+    <div class="panel-card">
+      <div class="panel-header"><h3><i class="fa-solid fa-star"></i> Strong Subjects</h3></div>
+      {% if strong_subjects %}
+        <ul class="subject-list">
+        {% for s in strong_subjects %}
+          <li><span>{{ s.subject }}</span><span class="badge badge-strong">{{ s.avg }}%</span></li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-circle-info"></i><p>Attempt some quizzes to see your strong subjects.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-lightbulb"></i> Recommendations</h3></div>
+    <ul class="recommend-list">
+    {% for r in recommendations %}
+      <li><i class="fa-solid fa-check"></i> {{ r }}</li>
+    {% endfor %}
+    </ul>
+  </div>
+
+{% else %}
+  <div class="stats-grid">
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-green"><i class="fa-solid fa-book-open"></i></div>
+      <div><span class="stat-value">{{ completed_topics }}</span><span class="stat-label">Chapters Completed</span></div>
+    </div>
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-orange"><i class="fa-solid fa-hourglass-half"></i></div>
+      <div><span class="stat-value">{{ remaining_topics }}</span><span class="stat-label">Remaining Topics</span></div>
+    </div>
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-blue"><i class="fa-solid fa-clock"></i></div>
+      <div><span class="stat-value">{{ total_hours }}h</span><span class="stat-label">Hours Studied</span></div>
+    </div>
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-purple"><i class="fa-solid fa-list-check"></i></div>
+      <div><span class="stat-value">{{ total_topics }}</span><span class="stat-label">Total Topics</span></div>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <div class="panel-card">
+      <div class="panel-header"><h3><i class="fa-solid fa-chart-line"></i> Weekly Study Hours</h3></div>
+      <canvas id="weekChart" height="110"></canvas>
+    </div>
+    <div class="panel-card">
+      <div class="panel-header"><h3><i class="fa-solid fa-chart-column"></i> Monthly Study Hours</h3></div>
+      <canvas id="monthChart" height="110"></canvas>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-layer-group"></i> Subject-wise Progress</h3></div>
+    {% if subject_progress %}
+      {% for s in subject_progress %}
+        <div class="subject-progress-row">
+          <span class="subject-name">{{ s.subject }}</span>
+          <div class="progress-bar"><div class="progress-fill" style="width: {{ s.pct }}%"></div></div>
+          <span class="subject-pct">{{ s.pct }}% ({{ s.completed }}/{{ s.total }})</span>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state"><i class="fa-solid fa-file-circle-question"></i><p>Upload a syllabus to see subject-wise progress.</p></div>
+    {% endif %}
+  </div>
+  <a href="{{ url_for('performance') }}" class="btn btn-primary"><i class="fa-solid fa-bullseye"></i> View Performance Prediction</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if not performance_view %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  new Chart(document.getElementById('weekChart'), {
+    type: 'bar',
+    data: { labels: {{ week_labels|safe }}, datasets: [{ label: 'Hours', data: {{ week_hours|safe }}, backgroundColor: '#7C3AED', borderRadius: 8 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+  new Chart(document.getElementById('monthChart'), {
+    type: 'bar',
+    data: { labels: {{ month_labels|safe }}, datasets: [{ label: 'Hours', data: {{ month_hours|safe }}, backgroundColor: '#06B6D4', borderRadius: 8 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+});
+</script>
+{% endif %}
+{% endblock %}

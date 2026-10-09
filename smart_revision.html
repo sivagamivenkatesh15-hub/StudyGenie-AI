@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Smart Revision Planner{% endblock %}
+{% block page_title %}Smart Revision Planner{% endblock %}
+
+{% block content %}
+<div class="panel-card spaced-rep-banner">
+  <div class="spaced-rep-chain">
+    <span>Study Today</span><i class="fa-solid fa-arrow-right"></i>
+    <span>+1 Day</span><i class="fa-solid fa-arrow-right"></i>
+    <span>+3 Days</span><i class="fa-solid fa-arrow-right"></i>
+    <span>+7 Days</span><i class="fa-solid fa-arrow-right"></i>
+    <span>+14 Days</span><i class="fa-solid fa-arrow-right"></i>
+    <span class="final">Final Revision</span>
+  </div>
+  <p>Every time you mark a study session complete on your Timetable, StudyGenie automatically builds this spaced-repetition chain so nothing is ever forgotten.</p>
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-calendar-day"></i> Today's Revision Tasks</h3></div>
+  {% if due_today %}
+    <div class="revision-timeline">
+    {% for r in due_today %}
+      <div class="revision-item due" data-id="{{ r['id'] }}">
+        <div class="revision-stage-dot stage-{{ r['stage'] }}">{{ r['stage'] }}</div>
+        <div class="revision-item-body">
+          <strong>{{ r['topic'] }}</strong>
+          <span>{{ r['subject'] }} • {{ stage_labels[r['stage']] }} • Due {{ r['revision_date'] }}</span>
+        </div>
+        <button class="btn btn-primary btn-sm mark-revision-done"><i class="fa-solid fa-check"></i> Mark Done</button>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state"><i class="fa-solid fa-mug-hot"></i><p>No revisions due today. Nicely on track!</p></div>
+  {% endif %}
+</div>
+
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-hourglass-half"></i> Upcoming Revisions</h3></div>
+    {% if upcoming %}
+      <div class="revision-timeline">
+      {% for r in upcoming %}
+        <div class="revision-item" data-id="{{ r['id'] }}">
+          <div class="revision-stage-dot stage-{{ r['stage'] }}">{{ r['stage'] }}</div>
+          <div class="revision-item-body">
+            <strong>{{ r['topic'] }}</strong>
+            <span>{{ r['subject'] }} • {{ stage_labels[r['stage']] }} • {{ r['revision_date'] }}</span>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><i class="fa-solid fa-calendar-check"></i><p>No upcoming revisions scheduled.</p></div>
+    {% endif %}
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-check-double"></i> Recently Completed</h3></div>
+    {% if completed_recent %}
+      <div class="revision-timeline">
+      {% for r in completed_recent %}
+        <div class="revision-item done">
+          <div class="revision-stage-dot stage-{{ r['stage'] }}"><i class="fa-solid fa-check"></i></div>
+          <div class="revision-item-body">
+            <strong>{{ r['topic'] }}</strong>
+            <span>{{ r['subject'] }} • {{ stage_labels[r['stage']] }} • Completed {{ r['completed_at'] }}</span>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><i class="fa-solid fa-clock"></i><p>Completed revisions will appear here.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/smart_revision.js') }}"></script>
+{% endblock %}

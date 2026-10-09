@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register | StudyGenie AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+  <div class="auth-blob blob1"></div>
+  <div class="auth-blob blob2"></div>
+
+  <div class="auth-card glass-card">
+    <a href="{{ url_for('index') }}" class="auth-brand"><i class="fa-solid fa-brain"></i> StudyGenie <b>AI</b></a>
+    <h2>Create Your Account</h2>
+    <p class="auth-sub">Start your smart, AI-powered study journey today.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash-msg flash-{{ category }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+      <label>Full Name</label>
+      <div class="input-group"><i class="fa-solid fa-user"></i>
+        <input type="text" name="name" required placeholder="Jane Doe">
+      </div>
+
+      <label>Email Address</label>
+      <div class="input-group"><i class="fa-solid fa-envelope"></i>
+        <input type="email" name="email" required placeholder="you@example.com">
+      </div>
+
+      <label>Password</label>
+      <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" name="password" id="registerPassword" required placeholder="At least 6 characters" autocomplete="new-password">
+        <button type="button" class="password-toggle-btn" id="toggleRegisterPassword" aria-label="Show or hide password" tabindex="-1">
+          <i class="fa-solid fa-eye" id="toggleRegisterPasswordIcon"></i>
+        </button>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="fa-solid fa-user-plus"></i> Create Account
+      </button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Sign In</a></p>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

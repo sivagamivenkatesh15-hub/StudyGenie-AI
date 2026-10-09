@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Reminders{% endblock %}
+{% block page_title %}Reminder System{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-bell"></i> Add a Reminder</h3></div>
+  <form id="reminderForm" class="form-grid inline-form">
+    <div class="form-field">
+      <select id="reminderType">
+        <option value="study">Study Reminder</option>
+        <option value="assignment">Assignment Reminder</option>
+        <option value="exam">Exam Countdown</option>
+      </select>
+    </div>
+    <div class="form-field"><input type="text" id="reminderTitle" placeholder="Title (e.g. Physics Assignment)" required></div>
+    <div class="form-field"><input type="date" id="reminderDate" required></div>
+    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Reminder</button>
+  </form>
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-hourglass-half"></i> Your Reminders</h3></div>
+  <div class="reminder-grid" id="reminderGrid">
+  {% for r in reminders %}
+    <div class="reminder-card type-{{ r.type }}" data-id="{{ r.id }}">
+      <div class="reminder-icon">
+        {% if r.type == 'exam' %}<i class="fa-solid fa-graduation-cap"></i>
+        {% elif r.type == 'assignment' %}<i class="fa-solid fa-file-pen"></i>
+        {% else %}<i class="fa-solid fa-book-open-reader"></i>{% endif %}
+      </div>
+      <div class="reminder-body">
+        <h4>{{ r.title }}</h4>
+        <span>{{ r.reminder_date }}</span>
+        {% if r.days_left is not none %}
+          {% if r.days_left >= 0 %}
+            <span class="countdown">{{ r.days_left }} day(s) left</span>
+          {% else %}
+            <span class="countdown overdue">Overdue</span>
+          {% endif %}
+        {% endif %}
+      </div>
+      <button class="icon-btn danger reminder-delete"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  {% else %}
+    <div class="empty-state" id="emptyReminders"><i class="fa-solid fa-bell-slash"></i><p>No reminders set yet.</p></div>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const reminderForm = document.getElementById('reminderForm');
+reminderForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const type = document.getElementById('reminderType').value;
+  const title = document.getElementById('reminderTitle').value.trim();
+  const reminder_date = document.getElementById('reminderDate').value;
+  if (!title || !reminder_date) return;
+
+  fetch('/api/reminders', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, title, reminder_date })
+  }).then(r => r.json()).then(data => {
+    if (data.success) { showToast('Reminder added!', 'success'); location.reload(); }
+    else showToast(data.error || 'Failed to add reminder', 'error');
+  });
+});
+
+document.querySelectorAll('.reminder-delete').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.reminder-card');
+    fetch(`/api/reminders/${card.dataset.id}`, { method: 'DELETE' })
+      .then(r => r.json()).then(() => { card.remove(); showToast('Reminder removed', 'info'); });
+  });
+});
+</script>
+{% endblock %}

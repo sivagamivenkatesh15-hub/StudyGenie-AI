@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}AI Study Planner{% endblock %}
+{% block page_title %}AI Study Planner{% endblock %}
+
+{% block content %}
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Your Study Plan</h3></div>
+    <form method="POST" action="{{ url_for('planner') }}" class="form-grid">
+      <div class="form-field">
+        <label>Exam Date</label>
+        <input type="date" name="exam_date" required>
+      </div>
+      <div class="form-field">
+        <label>Daily Study Hours</label>
+        <input type="number" name="daily_hours" min="1" max="16" step="0.5" value="3" required>
+      </div>
+      <div class="form-field">
+        <label>Subject Difficulty</label>
+        <select name="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Priority Subjects (comma separated)</label>
+        <input type="text" name="priority_subjects" placeholder="e.g. Physics, Chemistry, Maths">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="fa-solid fa-bolt"></i> Generate AI Study Plan
+      </button>
+    </form>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Previous Plans</h3></div>
+    {% if plans %}
+      <ul class="file-list">
+      {% for p in plans %}
+        <li>
+          <i class="fa-solid fa-calendar-days"></i>
+          <div>
+            <strong>Exam on {{ p['exam_date'] }}</strong>
+            <span>{{ p['daily_hours'] }}h/day • {{ p['difficulty']|capitalize }} • {{ p['priority_subjects'] or 'Auto-detected subjects' }}</span>
+          </div>
+        </li>
+      {% endfor %}
+      </ul>
+      <a href="{{ url_for('timetable') }}" class="btn btn-ghost btn-block"><i class="fa-solid fa-table-list"></i> View Latest Timetable</a>
+    {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-calendar-plus"></i>
+        <p>No study plans generated yet. Fill the form to get started!</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

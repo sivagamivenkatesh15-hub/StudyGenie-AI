@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Achievements{% endblock %}
+{% block page_title %}Achievements{% endblock %}
+
+{% block content %}
+<div class="panel-card level-card">
+  <div class="level-badge">
+    <span>Lv</span>
+    <strong>{{ level }}</strong>
+  </div>
+  <div class="level-info">
+    <h3>{{ xp }} XP Total</h3>
+    <div class="progress-bar xp-bar"><div class="progress-fill" style="width:{{ xp_progress_pct }}%"></div></div>
+    <p>{{ xp_into_level }} / {{ xp_per_level }} XP to Level {{ level + 1 }}</p>
+  </div>
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-medal"></i> Badge Collection</h3></div>
+  <div class="badge-grid">
+  {% for b in badges %}
+    <div class="badge-card {{ 'unlocked' if b.unlocked else 'locked' }}">
+      <div class="badge-icon"><i class="fa-solid {{ b.icon }}"></i></div>
+      <strong>{{ b.name }}</strong>
+      <span>{{ b.desc }}</span>
+      {% if b.unlocked %}
+        <span class="badge-unlocked-tag"><i class="fa-solid fa-check"></i> Unlocked</span>
+      {% else %}
+        <span class="badge-locked-tag"><i class="fa-solid fa-lock"></i> Locked</span>
+      {% endif %}
+    </div>
+  {% endfor %}
+  </div>
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Achievement History</h3></div>
+  {% if history %}
+    <ul class="file-list">
+    {% for h in history %}
+      <li>
+        <i class="fa-solid {{ h['icon'] }}" style="color: var(--accent);"></i>
+        <div>
+          <strong>{{ h['badge_name'] }}</strong>
+          <span>{{ h['description'] }} • Unlocked {{ h['unlocked_at'] }} {% if h['xp_reward'] %}• +{{ h['xp_reward'] }} XP{% endif %}</span>
+        </div>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state"><i class="fa-solid fa-medal"></i><p>No badges unlocked yet — start studying to earn your first one!</p></div>
+  {% endif %}
+</div>
+{% endblock %}

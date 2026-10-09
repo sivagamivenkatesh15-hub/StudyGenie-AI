@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In | StudyGenie AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+  <div class="auth-blob blob1"></div>
+  <div class="auth-blob blob2"></div>
+
+  <div class="auth-card glass-card">
+    <a href="{{ url_for('index') }}" class="auth-brand"><i class="fa-solid fa-brain"></i> StudyGenie <b>AI</b></a>
+    <h2>Welcome Back!</h2>
+    <p class="auth-sub">Continue your smart, AI-powered study journey.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash-msg flash-{{ category }}"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}" class="auth-form" autocomplete="on">
+      <label>Email Address</label>
+      <div class="input-group"><i class="fa-solid fa-envelope"></i>
+        <input type="email" name="email" required placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <label>Password</label>
+      <div class="input-group">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" name="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="password-toggle-btn" id="togglePassword" aria-label="Show or hide password" tabindex="-1">
+          <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+        </button>
+      </div>
+
+      <div class="auth-form-row">
+        <label class="checkbox-label">
+          <input type="checkbox" name="remember_me" id="rememberMe">
+          <span>Remember Me</span>
+        </label>
+        <a href="{{ url_for('forgot_password') }}" class="auth-link-inline">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <p class="auth-switch">Don't have an account? <a href="{{ url_for('register') }}">Create Account</a></p>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

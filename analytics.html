@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Productivity Analytics{% endblock %}
+
+{% block content %}
+<div class="tabs analytics-filters">
+  <a href="{{ url_for('analytics', range='today') }}" class="tab-btn {{ 'active' if range_key=='today' }}">Today</a>
+  <a href="{{ url_for('analytics', range='week') }}" class="tab-btn {{ 'active' if range_key=='week' }}">This Week</a>
+  <a href="{{ url_for('analytics', range='month') }}" class="tab-btn {{ 'active' if range_key=='month' }}">This Month</a>
+  <a href="{{ url_for('analytics', range='all') }}" class="tab-btn {{ 'active' if range_key=='all' }}">Overall</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-blue"><i class="fa-solid fa-clock"></i></div>
+    <div><span class="stat-value">{{ total_hours }}h</span><span class="stat-label">Study Hours</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-green"><i class="fa-solid fa-list-check"></i></div>
+    <div><span class="stat-value">{{ total_sessions }}</span><span class="stat-label">Sessions Completed</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-purple"><i class="fa-solid fa-chart-pie"></i></div>
+    <div><span class="stat-value">{{ completion_pct }}%</span><span class="stat-label">Syllabus Completion</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-orange"><i class="fa-solid fa-square-poll-vertical"></i></div>
+    <div><span class="stat-value">{{ avg_quiz_score }}%</span><span class="stat-label">Avg Quiz Score</span></div>
+  </div>
+  <div class="stat-card anim-card">
+    <div class="stat-icon icon-orange"><i class="fa-solid fa-fire"></i></div>
+    <div><span class="stat-value">{{ study_streak }}</span><span class="stat-label">Day Streak</span></div>
+  </div>
+</div>
+
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-chart-column"></i> Study Hours Over Time</h3></div>
+    <canvas id="hoursBarChart" height="110"></canvas>
+  </div>
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-chart-pie"></i> Subject-wise Time Distribution</h3></div>
+    <canvas id="subjectPieChart" height="110"></canvas>
+  </div>
+</div>
+
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-chart-line"></i> Quiz Performance Trend</h3></div>
+    <canvas id="quizLineChart" height="110"></canvas>
+  </div>
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-circle-notch"></i> Topics Completed vs Remaining</h3></div>
+    <canvas id="completionDoughnut" height="110"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const barLabels = {{ bar_labels|safe }};
+  const barData = {{ bar_data|safe }};
+  const subjectLabels = {{ subject_labels|safe }};
+  const subjectData = {{ subject_data|safe }};
+  const quizLabels = {{ quiz_labels|safe }};
+  const quizScores = {{ quiz_scores|safe }};
+  const palette = ['#7C3AED', '#06B6D4', '#F59E0B', '#22C55E', '#EF4444', '#A855F7', '#3B82F6', '#EC4899'];
+
+  new Chart(document.getElementById('hoursBarChart'), {
+    type: 'bar',
+    data: { labels: barLabels, datasets: [{ label: 'Hours', data: barData, backgroundColor: '#7C3AED', borderRadius: 8 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  new Chart(document.getElementById('subjectPieChart'), {
+    type: 'pie',
+    data: { labels: subjectLabels.length ? subjectLabels : ['No data yet'], datasets: [{ data: subjectData.length ? subjectData : [1], backgroundColor: palette }] },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  new Chart(document.getElementById('quizLineChart'), {
+    type: 'line',
+    data: {
+      labels: quizLabels.length ? quizLabels : ['No quizzes yet'],
+      datasets: [{ label: 'Score %', data: quizScores.length ? quizScores : [0], borderColor: '#06B6D4', backgroundColor: 'rgba(6,182,212,0.15)', fill: true, tension: 0.4, pointRadius: 4 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } }
+  });
+
+  new Chart(document.getElementById('completionDoughnut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Remaining'],
+      datasets: [{ data: [{{ completed_topics }}, {{ remaining_topics }}], backgroundColor: ['#22C55E', 'rgba(128,128,128,0.25)'] }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+});
+</script>
+{% endblock %}

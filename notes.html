@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}AI Notes Generator{% endblock %}
+{% block page_title %}AI Notes Generator{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-note-sticky"></i> Generate Notes from Syllabus</h3></div>
+
+  {% if uploads %}
+  <div class="form-grid inline-form">
+    <div class="form-field">
+      <label>Select Syllabus</label>
+      <select id="syllabusSelect">
+        {% for u in uploads %}
+          <option value="{{ u['id'] }}">{{ u['subject'] }} — {{ u['filename'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Note Type</label>
+      <select id="noteType">
+        <option value="short_notes">Short Notes</option>
+        <option value="summary">Chapter Summary</option>
+        <option value="important_points">Important Points</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="generateNotesBtn"><i class="fa-solid fa-magic"></i> Generate</button>
+  </div>
+
+  <div id="notesLoading" class="loading-spinner hidden"><div class="spinner"></div> Generating notes with AI...</div>
+  <div id="notesOutput" class="ai-output"></div>
+  {% else %}
+    <div class="empty-state-big">
+      <i class="fa-solid fa-file-circle-question"></i>
+      <h3>No Syllabus Uploaded</h3>
+      <p>Upload a syllabus PDF first to generate AI notes from it.</p>
+      <a href="{{ url_for('upload') }}" class="btn btn-primary"><i class="fa-solid fa-file-arrow-up"></i> Upload Syllabus</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/notes.js') }}"></script>
+{% endblock %}

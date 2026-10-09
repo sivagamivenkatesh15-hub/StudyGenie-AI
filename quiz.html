@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}AI Quiz Generator{% endblock %}
+{% block page_title %}AI Quiz Generator{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-circle-question"></i> Generate a Quiz from Syllabus</h3></div>
+
+  {% if uploads %}
+  <div class="form-grid inline-form">
+    <div class="form-field">
+      <label>Select Syllabus</label>
+      <select id="quizSyllabusSelect">
+        {% for u in uploads %}
+          <option value="{{ u['id'] }}" data-subject="{{ u['subject'] }}">{{ u['subject'] }} — {{ u['filename'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-primary" id="generateQuizBtn"><i class="fa-solid fa-magic"></i> Generate 10 MCQs</button>
+  </div>
+
+  <div id="quizLoading" class="loading-spinner hidden"><div class="spinner"></div> Generating quiz with AI...</div>
+  <div id="quizError" class="quiz-error hidden" role="alert">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <p id="quizErrorText"></p>
+    <button type="button" class="btn btn-primary" id="quizRetryBtn"><i class="fa-solid fa-rotate-right"></i> Retry</button>
+  </div>
+  <div id="quizContainer"></div>
+  <div id="quizResult" class="hidden"></div>
+  {% else %}
+    <div class="empty-state-big">
+      <i class="fa-solid fa-file-circle-question"></i>
+      <h3>No Syllabus Uploaded</h3>
+      <p>Upload a syllabus PDF first to generate an AI quiz from it.</p>
+      <a href="{{ url_for('upload') }}" class="btn btn-primary"><i class="fa-solid fa-file-arrow-up"></i> Upload Syllabus</a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Past Quiz Results</h3></div>
+  {% if results %}
+    <ul class="file-list">
+    {% for r in results %}
+      <li>
+        <i class="fa-solid fa-square-poll-vertical"></i>
+        <div>
+          <strong>{{ r['subject'] }}</strong>
+          <span>Score: {{ r['score'] }}/{{ r['total'] }} • {{ r['created_at'] }}</span>
+        </div>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state"><i class="fa-solid fa-chart-simple"></i><p>No quizzes attempted yet.</p></div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endblock %}

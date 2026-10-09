@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Upload Syllabus{% endblock %}
+{% block page_title %}Upload Syllabus{% endblock %}
+
+{% block content %}
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-file-arrow-up"></i> Upload PDF Syllabus</h3></div>
+    <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" class="form-grid">
+      <div class="form-field">
+        <label>Subject Name</label>
+        <input type="text" name="subject" placeholder="e.g. Physics" required>
+      </div>
+      <div class="form-field">
+        <label>Syllabus PDF</label>
+        <div class="file-drop" id="fileDrop">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <p>Drag & drop or click to select a PDF file</p>
+          <span id="fileName">No file selected</span>
+          <input type="file" name="syllabus_file" id="syllabusFile" accept="application/pdf" required hidden>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">
+        <i class="fa-solid fa-upload"></i> Upload & Extract Topics
+      </button>
+    </form>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-folder-open"></i> Your Uploaded Syllabi</h3></div>
+    {% if uploads %}
+      <ul class="file-list">
+      {% for u in uploads %}
+        <li>
+          <i class="fa-solid fa-file-pdf"></i>
+          <div>
+            <strong>{{ u['subject'] }}</strong>
+            <span>{{ u['filename'] }} • {{ u['uploaded_at'] }}</span>
+          </div>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state">
+        <i class="fa-solid fa-file-circle-question"></i>
+        <p>No syllabus uploaded yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('syllabusFile');
+const fileName = document.getElementById('fileName');
+
+fileDrop.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  fileName.textContent = fileInput.files.length ? fileInput.files[0].name : 'No file selected';
+});
+['dragover', 'dragleave', 'drop'].forEach(evt => {
+  fileDrop.addEventListener(evt, e => e.preventDefault());
+});
+fileDrop.addEventListener('dragover', () => fileDrop.classList.add('dragging'));
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragging'));
+fileDrop.addEventListener('drop', e => {
+  fileDrop.classList.remove('dragging');
+  if (e.dataTransfer.files.length) {
+    fileInput.files = e.dataTransfer.files;
+    fileName.textContent = e.dataTransfer.files[0].name;
+  }
+});
+</script>
+{% endblock %}

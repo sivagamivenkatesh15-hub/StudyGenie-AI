@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Weak Topic Detection{% endblock %}
+{% block page_title %}Weak Topic Detection{% endblock %}
+
+{% block content %}
+{% if not has_data %}
+  <div class="empty-state-big">
+    <i class="fa-solid fa-magnifying-glass-chart"></i>
+    <h3>No Quiz Data Yet</h3>
+    <p>Attempt a few AI-generated quizzes and we'll automatically detect your weak chapters here.</p>
+    <a href="{{ url_for('quiz') }}" class="btn btn-primary"><i class="fa-solid fa-circle-question"></i> Take a Quiz</a>
+  </div>
+{% else %}
+  <div class="stats-grid">
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-purple"><i class="fa-solid fa-layer-group"></i></div>
+      <div><span class="stat-value">{{ chapters|length }}</span><span class="stat-label">Chapters Analyzed</span></div>
+    </div>
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div><span class="stat-value">{{ priority_list|length }}</span><span class="stat-label">Weak Chapters Found</span></div>
+    </div>
+    <div class="stat-card anim-card">
+      <div class="stat-icon icon-blue"><i class="fa-solid fa-book-open"></i></div>
+      <div><span class="stat-value">{{ weak_subjects|length }}</span><span class="stat-label">Weak Subjects</span></div>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <div class="panel-card">
+      <div class="panel-header"><h3><i class="fa-solid fa-book"></i> Weak Subjects</h3></div>
+      {% if weak_subjects %}
+        <ul class="subject-list">
+        {% for s in weak_subjects %}
+          <li><span>{{ s.subject }}</span><span class="badge badge-weak">{{ s.avg_accuracy }}% avg</span></li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-face-smile"></i><p>No consistently weak subjects — nice work!</p></div>
+      {% endif %}
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-header"><h3><i class="fa-solid fa-lightbulb"></i> AI Recommendations</h3></div>
+      <ul class="recommend-list">
+      {% for r in recommendations %}
+        <li><i class="fa-solid fa-check"></i> {{ r }}</li>
+      {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-list-ol"></i> Study Priority List — Weak Chapters</h3></div>
+    {% if priority_list %}
+      {% for c in priority_list %}
+        <div class="weak-chapter-row">
+          <div class="weak-chapter-info">
+            <strong>{{ c.chapter }}</strong>
+            <span>{{ c.subject }} • {{ c.attempts }} attempt(s) • {{ c.wrong }} wrong answer(s)</span>
+          </div>
+          <div class="weak-chapter-bar">
+            <div class="progress-bar"><div class="progress-fill" style="width:{{ c.accuracy }}%; background: {{ 'linear-gradient(135deg,#EF4444,#F59E0B)' if c.accuracy < 40 else ('linear-gradient(135deg,#F59E0B,#FBBF24)' if c.accuracy < 65 else 'var(--gradient)') }}"></div></div>
+            <span>{{ c.accuracy }}%</span>
+          </div>
+          <span class="badge badge-{{ 'high' if c.level=='High' else ('medium' if c.level=='Medium' else 'low') }}">{{ c.level }} Priority</span>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state"><i class="fa-solid fa-trophy"></i><p>No weak chapters detected — you're doing great!</p></div>
+    {% endif %}
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-chart-column"></i> Accuracy by Chapter</h3></div>
+    <canvas id="weakTopicsChart" height="100"></canvas>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if has_data %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chapters = {{ chapters|tojson }};
+  new Chart(document.getElementById('weakTopicsChart'), {
+    type: 'bar',
+    data: {
+      labels: chapters.map(c => c.chapter),
+      datasets: [{
+        label: 'Accuracy %',
+        data: chapters.map(c => c.accuracy),
+        backgroundColor: chapters.map(c => c.accuracy < 40 ? '#EF4444' : (c.accuracy < 65 ? '#F59E0B' : '#22C55E')),
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, max: 100 } }
+    }
+  });
+});
+</script>
+{% endif %}
+{% endblock %}

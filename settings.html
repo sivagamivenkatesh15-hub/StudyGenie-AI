@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="grid-2col">
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-user-pen"></i> Profile Settings</h3></div>
+    <form id="profileForm" class="form-grid">
+      <div class="form-field"><label>Full Name</label><input type="text" id="profileName" value="{{ user['name'] }}" required></div>
+      <div class="form-field"><label>Email Address</label><input type="email" id="profileEmail" value="{{ user['email'] }}" required></div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </form>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-header"><h3><i class="fa-solid fa-lock"></i> Change Password</h3></div>
+    <form id="passwordForm" class="form-grid">
+      <div class="form-field"><label>Current Password</label><input type="password" id="currentPassword" required></div>
+      <div class="form-field"><label>New Password</label><input type="password" id="newPassword" required minlength="6"></div>
+      <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-key"></i> Update Password</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel-card">
+  <div class="panel-header"><h3><i class="fa-solid fa-palette"></i> Appearance</h3></div>
+  <div class="setting-row">
+    <div><strong>Dark Mode</strong><p>Toggle between light and dark themes.</p></div>
+    <label class="switch">
+      <input type="checkbox" id="darkModeSetting">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}
